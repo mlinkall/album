@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
+    <title>Upload Files from Mobile Phone to PC</title>
+    <style>
+   		.custom-btn {
+      		padding: 12px 24px;
+      		background: #007aff;
+      		color: white;
+      		border-radius: 8px;
+      		font-size: 44px;
+    	}  
+    	/*
+     	.file-input {
+      		opacity: 0;
+      		position: absolute;
+      		width: 100%;
+      		height: 100%;
+      		top: 0;
+      		left: 0;
+      		cursor: pointer;
+    	}
+    	*/
+	</style>
+</head>
+
+<body>
+    <h1>Please select files and upload to ther server</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+    
+	<div class="upload-wrapper" >
+    	<!--button class="custom-btn">Choose Files</button -->
+    	<input type="file" name="file[]" class="file-input" multiple />
+  	</div>
+  	<div>
+	    <input type="submit" value="upload files" />
+	    <!-- button type="submit"  class="custom-btn" value="upload files" /-->
+    </div>
+    </form>
+    
+  	<script>
+		document.querySelectorAll('button').forEach(btn => {
+  			btn.style.padding = '12px 24px';
+  			btn.style.fontSize = '44px';
+		});    
+		document.querySelectorAll('input').forEach(btn => {
+  			btn.style.padding = '12px 24px';
+  			btn.style.fontSize = '44px';
+		});
+  	</script>
+  </body>
+</html>
