@@ -42,10 +42,7 @@ def get_local_ip():
     return local_ip
 
 if __name__ == '__main__':
-   print(f"Serving Flask app '{app.name}'")
-   print(f"Debug mode: {app.debug}")
    print(f"Local IP address: {get_local_ip()}")
-   print("WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.")
    app.run(host='0.0.0.0',port=8080,debug=True)
    
 
