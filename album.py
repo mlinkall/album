@@ -22,9 +22,9 @@ def upload():
     if request.method == 'POST':
         uploaded_files = request.files.getlist("file[]")
         filenames = []
-        today = datatime.now()
+        today = datetime.now()
         date_folder_name = today.strftime("%Y%m%d")
-        target_directory_path = os.path.join(app.config['UPLOAD_FOLDER'], data_folder_name)
+        target_directory_path = os.path.join(app.config['UPLOAD_FOLDER'], date_folder_name)
         
         try:
             os.makedirs(target_directory_path, exist_ok=True)
@@ -39,7 +39,7 @@ def upload():
                 file_save_path = os.path.join(target_directory_path, filename)
                 file.save(file_save_path)
                 
-                relative_path_for_link = os.path.join(data_folder_name, filename)
+                relative_path_for_link = os.path.join(date_folder_name, filename)
                 filenames.append(relative_path_for_link)
                 
         return render_template('upload.html', filenames=filenames)
