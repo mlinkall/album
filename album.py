@@ -3,11 +3,14 @@ from werkzeug.utils import secure_filename
 import os
 import socket
 from datetime import datetime
+import logging
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads/'
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024  # max file size is 1GB
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov'])
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler("app.log"), logging.StreamHandler()])
 
 def allowed_file(filename):
     return '.' in filename and \
