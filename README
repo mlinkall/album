@@ -53,9 +53,18 @@ The server address is http://192.168.0.112:8080 and you can navigate it using th
 Please make sure the python is not blocked by firewall for Windows. Please refer to https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/configure#create-an-inbound-program-or-service-rule for deftail.
 
 python album.py 
-You can get your IP address by below command,
-ipconfig
+Local IP address: ('192.168.0.3', 56492)
+* Serving Flask app "album" (lazy loading)
+* Environment: production
+  WARNING: This is a development server. Do not use it in a print. Use a production WSGI server instead.
+* Debug mode: on
+* Restarting with stat local IP address: ('192.168.0.3', 56493)
+* Debugger is active!
+* Debugger PIN: 1xx-5xx-xxx
+* Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 
+The server address is http://192.168.0.3:8080 printed in the line "Local IP address: ('192.168.0.3', 56493)" and you can navigate it using this address.
+  
 6. Navigate from a cell phone
 Open web browser of a cell phone
 http://192.168.0.112:8080
