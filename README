@@ -24,9 +24,6 @@ source ~/anaconda3/bin/activate
 3.2 Windows
 click https://repo.anaconda.com/archive/Anaconda3-2024.10-1-Windows-x86_64.exe and install it
 
-for windows 7
-click https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe and install it
-
 
 4. Get source from github
 git clone https://github.com/mlinkall/album.git
