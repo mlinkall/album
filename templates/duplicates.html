@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Duplicate Images{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="row"><h1>Duplicate Images</h1><button class="secondary" type="button" onclick="requestRescan()">Rescan</button></div>
+  <p class="muted">"exact" means the files are byte-for-byte identical; "similar" means their perceptual hashes are close. The system only flags files and never deletes them automatically.</p>
+</section>
+<section class="card" data-detection-status>
+  <div class="status">
+    <div class="metric">Status<strong data-state>{{ status.state }}</strong></div>
+    <div class="metric">Processing Device<strong data-backend>{{ status.backend }}</strong></div>
+    <div class="metric">Images<strong data-files>{{ status.files_found or 0 }}</strong></div>
+    <div class="metric">Duplicates<strong data-duplicates>{{ status.duplicates or 0 }}</strong></div>
+    <div class="metric">Latest Runtime (seconds)<strong data-time>{{ status.elapsed_seconds or 0 }}</strong></div>
+  </div>
+</section>
+<section class="card">
+  {% if duplicates %}
+    {% for item in duplicates %}
+      <div class="pair">
+        <div><img class="thumb" src="{{ url_for('uploaded_file', filename=item.duplicate_of) }}"><p><code>{{ item.duplicate_of }}</code></p></div>
+        <div><strong>{{ item.match_type }}</strong><br>Distance: {{ item.distance }}</div>
+        <div><img class="thumb" src="{{ url_for('uploaded_file', filename=item.path) }}"><p><code>{{ item.path }}</code></p></div>
+      </div>
+    {% endfor %}
+  {% else %}<p>No duplicate images have been detected, or the background scan is still running.</p>{% endif %}
+</section>
+{% endblock %}

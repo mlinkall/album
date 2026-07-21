@@ -1,13 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Upload Files Result</title>
-</head>
-<body>
-    <h1>The File List:</h1>
-    {% for filename in filenames %}
-    <p>{{filename}}</p>
-    {% endfor %}
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Upload Results{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Upload Complete</h1>
+  <p>Saved {{ filenames|length }} file(s). {{ image_count }} image(s) were added to the background duplicate-detection queue.</p>
+
+  {% for filename in filenames %}
+    <p><a href="{{ url_for('uploaded_file', filename=filename) }}">{{ filename }}</a></p>
+  {% endfor %}
+
+  {% if rejected %}
+    <p class="muted">Unsupported files or invalid filenames: {{ rejected|join(', ') }}</p>
+  {% endif %}
+
+  <div class="row">
+    <a href="/"><button>Upload More</button></a>
+    <a href="/duplicates"><button class="secondary">View All Duplicate Images</button></a>
+  </div>
+</section>
+
+<section class="card" data-detection-status>
+  <h2>Background Detection</h2>
+  <div class="status">
+    <div class="metric">Status<strong data-state>{{ status.state }}</strong></div>
+    <div class="metric">Backend<strong data-backend>{{ status.backend }}</strong></div>
+    <div class="metric">Images<strong data-files>{{ status.files_found or 0 }}</strong></div>
+    <div class="metric">Duplicates<strong data-duplicates>{{ status.duplicates or 0 }}</strong></div>
+    <div class="metric">Last Duration (seconds)<strong data-time>{{ status.elapsed_seconds or 0 }}</strong></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Results for This Upload</h2>
+  <div id="upload-duplicate-result">
+    {% if image_count > 0 %}
+      <p class="muted">Detecting duplicates in the background. Please wait...</p>
+    {% else %}
+      <p>No images were uploaded.</p>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+const uploadedPaths = new Set({{ filenames | tojson }});
+const uploadedImageCount = {{ image_count | int }};
+const resultBox = document.getElementById('upload-duplicate-result');
+
+function imageUrl(path) {
+  return '/uploads/' + path.split('/').map(encodeURIComponent).join('/');
+}
+
+function createImageBlock(path) {
+  const container = document.createElement('div');
+
+  const image = document.createElement('img');
+  image.className = 'thumb';
+  image.src = imageUrl(path);
+  image.alt = path;
+
+  const text = document.createElement('p');
+  const code = document.createElement('code');
+  code.textContent = path;
+  text.appendChild(code);
+
+  container.appendChild(image);
+  container.appendChild(text);
+  return container;
+}
+
+function showDuplicatePairs(items) {
+  resultBox.replaceChildren();
+
+  if (items.length === 0) {
+    const message = document.createElement('p');
+    message.textContent = 'No duplicate images were detected in this upload.';
+    resultBox.appendChild(message);
+    return;
+  }
+
+  const summary = document.createElement('p');
+  summary.textContent = `${items.length} duplicate relationship(s) were detected in this upload:`;
+  resultBox.appendChild(summary);
+
+  for (const item of items) {
+    const pair = document.createElement('div');
+    pair.className = 'pair';
+
+    const matchInfo = document.createElement('div');
+    const type = document.createElement('strong');
+    type.textContent = item.match_type || 'duplicate';
+    const distance = document.createElement('div');
+    distance.textContent = `Distance: ${item.distance ?? 0}`;
+    matchInfo.appendChild(type);
+    matchInfo.appendChild(distance);
+
+    pair.appendChild(createImageBlock(item.duplicate_of));
+    pair.appendChild(matchInfo);
+    pair.appendChild(createImageBlock(item.path));
+    resultBox.appendChild(pair);
+  }
+}
+
+async function waitForUploadDetection() {
+  if (uploadedImageCount === 0) return;
+
+  try {
+    const statusResponse = await fetch('/api/detection/status', {cache: 'no-store'});
+    if (!statusResponse.ok) throw new Error('Unable to read the detection status.');
+    const status = await statusResponse.json();
+
+    if (status.state === 'error') {
+      resultBox.textContent = `Detection failed: ${status.last_error || 'Unknown error'}`;
+      return;
+    }
+
+    const finished = status.state === 'idle' && Number(status.queued_tasks || 0) === 0;
+    if (!finished) {
+      resultBox.innerHTML = '<p class="muted">Detecting duplicates in the background. Please wait...</p>';
+      window.setTimeout(waitForUploadDetection, 700);
+      return;
+    }
+
+    const duplicatesResponse = await fetch('/api/detection/duplicates', {cache: 'no-store'});
+    if (!duplicatesResponse.ok) throw new Error('Unable to read duplicate-image results.');
+    const duplicates = await duplicatesResponse.json();
+
+    const currentUploadDuplicates = duplicates.filter(item =>
+      uploadedPaths.has(item.path) || uploadedPaths.has(item.duplicate_of)
+    );
+
+    showDuplicatePairs(currentUploadDuplicates);
+  } catch (error) {
+    console.error(error);
+    resultBox.textContent = 'Unable to load the detection results. Please refresh the page and try again.';
+  }
+}
+
+waitForUploadDetection();
+</script>
+{% endblock %}
